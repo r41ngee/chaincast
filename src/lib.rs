@@ -1,8 +1,10 @@
+#![doc = include_str!("../README.md")]
+
 /// Converts a value through a chain of [`From`] implementations.
 ///
 /// `chaincast!(x; B, C)` expands to `C::from(B::from(x))`: one
-/// `<Type>::from(..)` call per type in the list, applied left to right.
-/// That keeps a multi-step conversion readable, without nesting calls
+/// `<Type>::from(…)` call per type in the list, applied left to right.
+/// That keeps a multistep conversion readable, without nesting calls
 /// inside-out or spelling out the intermediate type for every `.into()`.
 ///
 /// # Syntax
