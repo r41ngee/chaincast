@@ -11,3 +11,13 @@ macro_rules! chaincast {
         __inner_result
     }};
 }
+
+#[macro_export]
+macro_rules! chaincast_primitive {
+    (
+        $orig:expr;
+        $($rest:ty),* $(,)?
+    ) => {
+        $orig $(as $rest)*
+    };
+}
