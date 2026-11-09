@@ -97,3 +97,20 @@ macro_rules! chaincast_primitive {
         $orig $(as $rest)*
     };
 }
+
+#[macro_export]
+macro_rules! try_chaincast {
+    (
+        $orig:expr;
+        $($rest:ty),* $(,)?
+    ) => {{
+        let __closed: Result<_, Box<dyn Error>> || {
+            let __inner_result: $orig;
+            $(
+            let __inner_result = <$rest>::try_from(__inner_result)?;
+            )*
+            __inner_result
+        };
+        __closed
+    }};
+}
