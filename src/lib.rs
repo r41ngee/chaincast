@@ -1,3 +1,67 @@
+/// Converts a value through a chain of [`From`] implementations.
+///
+/// `chaincast!(x; B, C)` expands to `C::from(B::from(x))`: one
+/// `<Type>::from(..)` call per type in the list, applied left to right.
+/// That keeps a multi-step conversion readable, without nesting calls
+/// inside-out or spelling out the intermediate type for every `.into()`.
+///
+/// # Syntax
+///
+/// ```text
+/// chaincast!(expression; Type1, Type2, ..., TypeN)
+/// ```
+///
+/// The `;` separates the value from the list of types to convert it through.
+/// The macro evaluates to the value of the last type in the list; a trailing
+/// comma is allowed.
+///
+/// # Requirements
+///
+/// Every step needs a `From` impl: `Type1: From<T>`, where `T` is the type of
+/// `expression`, and `TypeN: From<TypeN-1>` for each subsequent step. Only
+/// infallible conversions are covered — use `TryFrom` for fallible ones.
+///
+/// # Examples
+///
+/// ```
+/// use chaincast::chaincast;
+///
+/// struct A;
+/// struct B;
+/// struct C;
+///
+/// impl From<A> for B {
+///     fn from(_: A) -> B {
+///         B
+///     }
+/// }
+///
+/// impl From<B> for C {
+///     fn from(_: B) -> C {
+///         C
+///     }
+/// }
+///
+/// // The result type is concrete, so no annotation is needed.
+/// let _c = chaincast!(A; B, C);
+/// ```
+///
+/// Chains through standard library types work the same way:
+///
+/// ```
+/// use std::ffi::OsString;
+/// use std::path::PathBuf;
+///
+/// use chaincast::chaincast;
+///
+/// let path = chaincast!(String::from("/tmp"); OsString, PathBuf);
+/// assert_eq!(path, PathBuf::from("/tmp"));
+/// ```
+///
+/// The macro names no paths of its own, so it also works in `#![no_std]`
+/// crates, and its internal binding is hygienic.
+///
+/// See [`chaincast_primitive!`] for casting primitives with `as`.
 #[macro_export]
 macro_rules! chaincast {
     (
