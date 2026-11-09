@@ -1,3 +1,5 @@
+mod primitive;
+
 fn main() {
     let a = A{};
     let _c: C = chaincast::chaincast!(
@@ -5,6 +7,8 @@ fn main() {
         B,
         C
     );
+
+    primitive::example_primitive();
 }
 
 struct A;
