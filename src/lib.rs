@@ -110,7 +110,7 @@ macro_rules! try_chaincast {
             let __inner_result = <$rest>::try_from(__inner_result)?;
             )*
             __inner_result
-        };
+        }();
         __closed
     }};
 }
