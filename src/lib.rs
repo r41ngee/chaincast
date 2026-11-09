@@ -2,7 +2,7 @@
 macro_rules! chaincast {
     (
         $orig:expr;
-        $($rest:ty),*
+        $($rest:ty),* $(,)?
     ) => {{
         let __inner_result = $orig;
         $(
