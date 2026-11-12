@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![no_std]
 
 /// Converts a value through a chain of [`From`] implementations.
 ///
