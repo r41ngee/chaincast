@@ -1,4 +1,4 @@
-pub fn example_primitive() {
+fn main() {
     let orig: i32 = -2000;
 
     // `chaincast_primitive!` expands to `orig as u8 as i8`, i.e. two plain
