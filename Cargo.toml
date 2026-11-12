@@ -7,7 +7,7 @@ members = [
 name = "chaincast"
 description = "small macro to perform chained ::from execution"
 license = "MIT"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]
