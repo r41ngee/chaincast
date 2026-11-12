@@ -104,13 +104,15 @@ macro_rules! try_chaincast {
         $orig:expr;
         $($rest:ty),* $(,)?
     ) => {{
-        let __closed: Result<_, Box<dyn Error>> || {
-            let __inner_result: $orig;
+        use std::error::Error;
+
+        let __closed: Result<_, Box<dyn Error>> = (|| {
+            let __inner_result = $orig;
             $(
             let __inner_result = <$rest>::try_from(__inner_result)?;
             )*
-            __inner_result
-        }();
+            Ok(__inner_result)
+        })();
         __closed
     }};
 }
