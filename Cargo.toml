@@ -1,8 +1,3 @@
-[workspace]
-members = [
-    ".",
-]
-
 [package]
 name = "chaincast"
 description = "small macro to perform chained ::from execution"
