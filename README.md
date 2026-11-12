@@ -8,13 +8,13 @@ A tiny Rust macro for chained `From` conversions.
 
 `chaincast!` turns a multistep conversion into a single readable line:
 
-```rust
+```rust,ignore
 let c: C = chaincast!(a; B, C);
 ```
 
 instead of a nest of calls you have to read inside-out:
 
-```rust
+```rust,ignore
 let c: C = C::from(B::from(a));
 ```
 
@@ -80,7 +80,7 @@ without a `use` as well.
 
 ## Syntax
 
-```rust
+```text
 chaincast!(expression; Type1, Type2, ..., TypeN);
 ```
 
@@ -94,13 +94,13 @@ The chain ends at `TypeN`; the whole macro evaluates to that value.
 
 ## Expansion
 
-```rust
+```rust,ignore
 chaincast!(x; B, C)
 ```
 
 expands to:
 
-```rust
+```rust,ignore
 {
     let __inner_result = x;
     let __inner_result = <B>::from(__inner_result);
@@ -139,7 +139,8 @@ so nothing leaks into the surrounding scope.
 Numeric widening:
 
 ```rust
-let n = chaincast!(1u8; u16, u32); // u32
+let n = chaincast::chaincast!(1u8; u16, u32); // u32
+assert_eq!(n, 1u32);
 ```
 
 Building a path from a string:
@@ -148,26 +149,33 @@ Building a path from a string:
 use std::ffi::OsString;
 use std::path::PathBuf;
 
-let p = chaincast!(String::from("/tmp"); OsString, PathBuf);
+let path = chaincast::chaincast!(String::from("/tmp"); OsString, PathBuf);
+assert_eq!(path, PathBuf::from("/tmp"));
 ```
 
 Ending on a generic type:
 
 ```rust
 fn widen<T: From<u16>>(v: u8) -> T {
-    chaincast!(v; u16, T)
+    chaincast::chaincast!(v; u16, T)
 }
 
 let x: u64 = widen(1);
+assert_eq!(x, 1);
 ```
 
 Inside a fallible function, with `?` in the first argument:
 
 ```rust
-fn load(input: Option<A>) -> Option<C> {
-    let c: C = chaincast!(input?; B, C);
-    Some(c)
+use std::ffi::OsString;
+use std::path::PathBuf;
+
+fn load(input: Option<String>) -> Option<PathBuf> {
+    let path: PathBuf = chaincast::chaincast!(input?; OsString, PathBuf);
+    Some(path)
 }
+
+assert_eq!(load(Some("/tmp".to_owned())), Some(PathBuf::from("/tmp")));
 ```
 
 The macro names no paths from `std`, so it also works in `#![no_std]` crates.
@@ -176,8 +184,8 @@ The macro names no paths from `std`, so it also works in `#![no_std]` crates.
 
 The tempting shortcut is to chain `.into()` calls:
 
-```rust
-let c: C = a.into().into(); // error[E0282]: type annotations needed
+```rust,compile_fail
+let n: u32 = 1u8.into().into(); // error[E0282]: type annotations needed
 ```
 
 That does **not** compile. `into()` is generic over its target, so inference has
@@ -185,16 +193,17 @@ no way to know what the middle step should be. You have to name the intermediate
 type by hand:
 
 ```rust
-let c: C = B::from(a).into();
+let n: u32 = u16::from(1u8).into();
 // or
-let c: C = Into::<B>::into(a).into();
+let n: u32 = Into::<u16>::into(1u8).into();
 ```
 
 `chaincast!` does exactly that naming for you, and keeps every step visible in
 one place:
 
 ```rust
-let c = chaincast!(a; B, C);
+let n = chaincast::chaincast!(1u8; u16, u32);
+assert_eq!(n, 1u32);
 ```
 
 The result type is concrete, so no annotation is required. For a single
